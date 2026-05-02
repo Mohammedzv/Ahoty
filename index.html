@@ -396,53 +396,66 @@
   <span>DEV_ELITE</span>
 </div>
 
-  </div></div><script>
+  </div></div><script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDGYlm_lHv1pfuDD2DkpOV0ddRAIBxxEkI",
+    authDomain: "sisters-4eac9.firebaseapp.com",
+    projectId: "sisters-4eac9",
+    storageBucket: "sisters-4eac9.firebasestorage.app",
+    messagingSenderId: "84995989913",
+    appId: "1:84995989913:web:2f519917fe3d1525fef308",
+    measurementId: "G-WR5NV7FQZ3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
   const messages = document.getElementById('messages');
   const input = document.getElementById('messageInput');
 
-  function sendMessage() {
+  async function sendMessage() {
     if(input.value.trim() === '') return;
 
-    const msg = document.createElement('div');
-    msg.classList.add('message', 'sent');
-
-    msg.innerHTML = `
-      <div class="name">YOU</div>
-      <div class="text">${input.value}</div>
-    `;
-
-    messages.appendChild(msg);
-    messages.scrollTop = messages.scrollHeight;
+    await addDoc(collection(db, 'messages'), {
+      name: 'YOU',
+      text: input.value,
+      createdAt: serverTimestamp()
+    });
 
     input.value = '';
-
-    setTimeout(autoReply, 1200);
   }
 
-  function autoReply() {
-    const replies = [
-      'Welcome Hacker ⚡',
-      'تم الاتصال بالسيرفر بنجاح 🔥',
-      'الشات دا جامد 😎',
-      'أهلاً بالمبرمجين',
-      'SYSTEM ACTIVE'
-    ];
+  const q = query(collection(db, 'messages'), orderBy('createdAt'));
 
-    const randomReply = replies[Math.floor(Math.random() * replies.length)];
+  onSnapshot(q, (snapshot) => {
+    messages.innerHTML = '';
 
-    const reply = document.createElement('div');
-    reply.classList.add('message', 'received');
+    snapshot.forEach((doc) => {
+      const data = doc.data();
 
-    reply.innerHTML = `
-      <div class="name">SYSTEM</div>
-      <div class="text">${randomReply}</div>
-    `;
+      const msg = document.createElement('div');
+      msg.classList.add('message');
 
-    messages.appendChild(reply);
+      if(data.name === 'YOU') {
+        msg.classList.add('sent');
+      } else {
+        msg.classList.add('received');
+      }
+
+      msg.innerHTML = `
+        <div class="name">${data.name}</div>
+        <div class="text">${data.text}</div>
+      `;
+
+      messages.appendChild(msg);
+    });
+
     messages.scrollTop = messages.scrollHeight;
-  }
-
-  input.addEventListener('keypress', function(e) {
+  });
+input.addEventListener('keypress', function(e) {
     if(e.key === 'Enter') {
       sendMessage();
     }
