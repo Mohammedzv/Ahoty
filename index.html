@@ -1,0 +1,455 @@
+<!DOCTYPE html><html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>اخواتي شات</title>  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Consolas, Tahoma, monospace;
+    }
+
+    body {
+      background: #050505;
+      color: #00ff88;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .app {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: #0b0b0b;
+      border-left: 2px solid #00ff88;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 20px rgba(0,255,136,0.15);
+    }
+
+    .logo {
+      padding: 22px;
+      text-align: center;
+      font-size: 30px;
+      font-weight: bold;
+      color: #00ff88;
+      border-bottom: 1px solid rgba(0,255,136,0.2);
+      text-shadow: 0 0 20px #00ff88;
+      letter-spacing: 2px;
+    }
+
+    .profile {
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(0,255,136,0.1);
+    }
+
+    .avatar {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      background: #00ff88;
+      color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      font-weight: bold;
+      box-shadow: 0 0 15px #00ff88;
+    }
+
+    .profile h4 {
+      color: #00ff88;
+    }
+
+    .profile small {
+      color: #8affc1;
+    }
+
+    .rooms {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .room {
+      background: #101010;
+      border: 1px solid rgba(0,255,136,0.15);
+      padding: 15px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .room:hover,
+    .room.active {
+      background: rgba(0,255,136,0.08);
+      border-color: #00ff88;
+      box-shadow: 0 0 15px rgba(0,255,136,0.3);
+      transform: translateY(-2px);
+    }
+
+    .room h3 {
+      margin-bottom: 5px;
+      color: #00ff88;
+    }
+
+    .room span {
+      color: #8affc1;
+      font-size: 13px;
+    }
+
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #070707;
+    }
+
+    .chat-header {
+      padding: 18px;
+      background: #0d0d0d;
+      border-bottom: 1px solid rgba(0,255,136,0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-header h2 {
+      color: #00ff88;
+      text-shadow: 0 0 10px #00ff88;
+    }
+
+    .online-box {
+      background: rgba(0,255,136,0.08);
+      border: 1px solid #00ff88;
+      color: #00ff88;
+      padding: 8px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+      box-shadow: 0 0 10px rgba(0,255,136,0.2);
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      background: #050505;
+      background-image:
+      linear-gradient(rgba(0,255,136,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.04) 1px, transparent 1px);
+      background-size: 25px 25px;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 14px;
+      border-radius: 14px;
+      animation: fadeIn 0.3s ease;
+      line-height: 1.7;
+    }
+
+    .received {
+      align-self: flex-start;
+      background: #101010;
+      border: 1px solid rgba(0,255,136,0.15);
+      color: #d7ffe9;
+      border-top-right-radius: 0;
+    }
+
+    .sent {
+      align-self: flex-end;
+      background: #00ff88;
+      color: black;
+      font-weight: bold;
+      border-top-left-radius: 0;
+      box-shadow: 0 0 15px rgba(0,255,136,0.4);
+    }
+
+    .message .name {
+      font-size: 13px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    .typing {
+      padding: 10px 20px;
+      background: #0c0c0c;
+      color: #77ffb6;
+      border-top: 1px solid rgba(0,255,136,0.08);
+      font-size: 13px;
+    }
+
+    .chat-input {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+      background: #0d0d0d;
+      border-top: 1px solid rgba(0,255,136,0.15);
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,255,136,0.2);
+      background: #111;
+      color: #00ff88;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .chat-input input::placeholder {
+      color: #6cffab;
+    }
+
+    .chat-input button {
+      background: #00ff88;
+      color: black;
+      border: none;
+      padding: 0 25px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+      box-shadow: 0 0 15px rgba(0,255,136,0.4);
+    }
+
+    .chat-input button:hover {
+      transform: scale(1.05);
+    }
+
+    .users {
+      width: 250px;
+      background: #0b0b0b;
+      border-right: 2px solid #00ff88;
+      padding: 15px;
+      overflow-y: auto;
+      box-shadow: 0 0 20px rgba(0,255,136,0.1);
+    }
+
+    .users h3 {
+      margin-bottom: 15px;
+      color: #00ff88;
+    }
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      background: #111;
+      transition: 0.3s;
+      border: 1px solid transparent;
+    }
+
+    .user:hover {
+      border-color: #00ff88;
+      box-shadow: 0 0 10px rgba(0,255,136,0.25);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #00ff88;
+      box-shadow: 0 0 10px #00ff88;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mobile-toggle {
+      display: none;
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 999;
+      background: #00ff88;
+      color: black;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0,255,136,0.4);
+    }
+
+    @media (max-width: 900px) {
+      .users {
+        display: none;
+      }
+
+      .sidebar {
+        position: absolute;
+        right: -100%;
+        top: 0;
+        height: 100%;
+        z-index: 999;
+        transition: 0.4s;
+      }
+
+      .sidebar.show {
+        right: 0;
+      }
+
+      .mobile-toggle {
+        display: block;
+      }
+
+      .message {
+        max-width: 90%;
+      }
+    }
+  </style></head><body><button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+
+<div class="app">  <div class="sidebar" id="sidebar">
+    <div class="logo">اخواتي شات</div><div class="profile">
+  <div class="avatar">E</div>
+  <div>
+    <h4>Elite User</h4>
+    <small>ONLINE</small>
+  </div>
+</div>
+
+<div class="rooms">
+  <div class="room active">
+    <h3>💻 الروم العام</h3>
+    <span>230 عضو متصل</span>
+  </div>
+
+  <div class="room">
+    <h3>🔥 روم الهكر</h3>
+    <span>110 عضو متصل</span>
+  </div>
+
+  <div class="room">
+    <h3>⚡ روم البرمجة</h3>
+    <span>62 عضو متصل</span>
+  </div>
+</div>
+
+  </div>  <div class="chat-area"><div class="chat-header">
+  <h2>⚡ اخواتي شات</h2>
+  <div class="online-box">ONLINE USERS : 230</div>
+</div>
+
+<div class="messages" id="messages">
+
+  <div class="message received">
+    <div class="name">SYSTEM</div>
+    <div class="text">مرحبًا بك في اخواتي شات ⚡</div>
+  </div>
+
+  <div class="message received">
+    <div class="name">ROOT_ADMIN</div>
+    <div class="text">استمتع بأفضل شات للمبرمجين 😎</div>
+  </div>
+
+</div>
+
+<div class="typing">● أحد الأعضاء يكتب الآن...</div>
+
+<div class="chat-input">
+  <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." />
+  <button onclick="sendMessage()">إرسال</button>
+</div>
+
+  </div>  <div class="users">
+    <h3>🟢 ONLINE</h3><div class="user">
+  <div class="dot"></div>
+  <span>ROOT_ADMIN</span>
+</div>
+
+<div class="user">
+  <div class="dot"></div>
+  <span>BLACK_HAT</span>
+</div>
+
+<div class="user">
+  <div class="dot"></div>
+  <span>CODER_X</span>
+</div>
+
+<div class="user">
+  <div class="dot"></div>
+  <span>DEV_ELITE</span>
+</div>
+
+  </div></div><script>
+  const messages = document.getElementById('messages');
+  const input = document.getElementById('messageInput');
+
+  function sendMessage() {
+    if(input.value.trim() === '') return;
+
+    const msg = document.createElement('div');
+    msg.classList.add('message', 'sent');
+
+    msg.innerHTML = `
+      <div class="name">YOU</div>
+      <div class="text">${input.value}</div>
+    `;
+
+    messages.appendChild(msg);
+    messages.scrollTop = messages.scrollHeight;
+
+    input.value = '';
+
+    setTimeout(autoReply, 1200);
+  }
+
+  function autoReply() {
+    const replies = [
+      'Welcome Hacker ⚡',
+      'تم الاتصال بالسيرفر بنجاح 🔥',
+      'الشات دا جامد 😎',
+      'أهلاً بالمبرمجين',
+      'SYSTEM ACTIVE'
+    ];
+
+    const randomReply = replies[Math.floor(Math.random() * replies.length)];
+
+    const reply = document.createElement('div');
+    reply.classList.add('message', 'received');
+
+    reply.innerHTML = `
+      <div class="name">SYSTEM</div>
+      <div class="text">${randomReply}</div>
+    `;
+
+    messages.appendChild(reply);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  input.addEventListener('keypress', function(e) {
+    if(e.key === 'Enter') {
+      sendMessage();
+    }
+  });
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('show');
+  }
+</script></body>
+</html>
